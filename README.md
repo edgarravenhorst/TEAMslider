@@ -6,7 +6,7 @@ HTML5 Imageslider
 TODO
 ==========
 WIEH -> Add bullets.
-WIEH -> Resize images on window resize.
+WIEH -> Resize images on window resize. \n
 EA/WIEH -> Add more configurable settings.
 EA -> Seperate slider content from interface.
 
