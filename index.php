@@ -102,11 +102,10 @@
 		</section>
 		
 		<script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
-		<script src="assets/js/jquery.touchSwipe.min.js"></script>
-		<script src="assets/js/preload.js"></script>
-		<script src="assets/js/slider.js"></script>
-		<script src="assets/js/animations/fade.animation.js"></script>
-		<script src="assets/js/animations/slide.animation.js"></script>
+		<script src="assets/js/build/jquery.touchSwipe.min.js"></script>
+		<script src="assets/js/build/slider.js"></script>
+		<script src="assets/js/build/animations/fade.animation.js"></script>
+		<script src="assets/js/build/animations/slide.animation.js"></script>
 		
 		<script>
 			var new_slider = new AllSlider('#allslider-1', 600, 262, {animType:'fade'});

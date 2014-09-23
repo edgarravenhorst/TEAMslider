@@ -76,7 +76,7 @@ var AllSlider = function(element, width, height, vars){
 	};
 	
 	this.initSlides = function(reinitialize){
-		if (this.slidesInitialized == false || reinitialize == true){
+		if (this.slidesInitialized === false || reinitialize === true){
 			this.slides = [];
 			this.sliderElements = this.element.find('.sliderElem');
 			this.slideCount = this.element.find('.sliderElem').length;
