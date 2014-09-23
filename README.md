@@ -1,7 +1,7 @@
 TEAMslider
 ==========
 
-HTML5 Imageslider 
+HTML5 Imageslider that just works
 
 TODO
 ==========
