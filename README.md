@@ -5,14 +5,16 @@ HTML5 Imageslider
 
 TODO
 ==========
-WIEH -> Add bullets.<br>
-WIEH -> Resize images on window resize.<br>
-EA/WIEH -> Add more configurable settings.<br>
-EA -> Seperate slider content from interface.<br>
-<br>
--> Add image thumbs/thumb slider.<br>
--> Add video's.<br>
--> Set slide direction to vertical.<br>
+<ul>
+<li>WIEH -> Add bullets.</li>
+<li>WIEH -> Resize images on window resize.</li>
+<li>EA/WIEH -> Add more configurable settings.</li>
+<li>EA -> Seperate slider content from interface.</li>
+</ul><ul>
+<li>Add image thumbs/thumb slider.</li>
+<li>Add video's.</li>
+<li>Set slide direction to vertical.</li>
+</ul>
 <br>
 BUGS
 ==========
