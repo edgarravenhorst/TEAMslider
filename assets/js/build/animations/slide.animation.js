@@ -13,14 +13,16 @@ AllSlider.prototype.init_slide_animation = function(){
 	this.element.find('.sliderElem').show();
 	this.slideContainer.css('width', containerWidth);
 	
-	this.slideContainer.find('.description').css('-webkit-transform', 'translateY(' + this.slideContainer.find('.description').outerHeight() + 'px)');
-	this.slideContainer.find('.description').css('transform', 'translateY(' + this.slideContainer.find('.description').outerHeight() + 'px)');
-	this.slideContainer.find('.description').css('-ms-transform', 'translateY(' + this.slideContainer.find('.description').outerHeight() + 'px)');
-	
-	this.slideContainer.find('.description').css('-webkit-transition', 'all 0.4s ease-in-out');
-	this.slideContainer.find('.description').css('-moz-transition', 'all 0.4s ease-in-out');
-	this.slideContainer.find('.description').css('-o-transition', 'all 0.4s ease-in-out');
-	this.slideContainer.find('.description').css('transition', 'all 0.4s ease-in-out');
+	if(this.animVars.descriptionAnim == 'slideUp'){
+		this.slideContainer.find('.description').css('-webkit-transform', 'translateY(' + this.slideContainer.find('.description').outerHeight() + 'px)');
+		this.slideContainer.find('.description').css('transform', 'translateY(' + this.slideContainer.find('.description').outerHeight() + 'px)');
+		this.slideContainer.find('.description').css('-ms-transform', 'translateY(' + this.slideContainer.find('.description').outerHeight() + 'px)');
+		
+		this.slideContainer.find('.description').css('-webkit-transition', 'all 0.4s ease-in-out');
+		this.slideContainer.find('.description').css('-moz-transition', 'all 0.4s ease-in-out');
+		this.slideContainer.find('.description').css('-o-transition', 'all 0.4s ease-in-out');
+		this.slideContainer.find('.description').css('transition', 'all 0.4s ease-in-out');
+	}
 	
 	this.slideContainer.on(transitionEvent, function() {
 		var is_max = false;
@@ -44,6 +46,17 @@ AllSlider.prototype.init_slide_animation = function(){
 			this.slideContainer.css('-webkit-transform', 'translateX(-' + slideposition + 'px)');
 			this.slideContainer.css('transform', 'translateX(-' + slideposition + 'px)');
 			this.slideContainer.css('-ms-transform', 'translateX(-' + slideposition + 'px)');
+			
+			if(this.animVars.descriptionAnim == 'slideUp'){
+				this.slideContainer.find('#image-' + this.currentSlide + ' .description').css('-webkit-transition', 'initial');
+				this.slideContainer.find('#image-' + this.currentSlide + ' .description').css('-moz-transition', 'initial');
+				this.slideContainer.find('#image-' + this.currentSlide + ' .description').css('-o-transition', 'initial');
+				this.slideContainer.find('#image-' + this.currentSlide + ' .description').css('transition', 'initial');
+	
+				this.slideContainer.find('#image-' + this.currentSlide + ' .description').css('-webkit-transform', 'translateY(0px)');
+				this.slideContainer.find('#image-' + this.currentSlide + ' .description').css('transform', 'translateY(0px)');
+				this.slideContainer.find('#image-' + this.currentSlide + ' .description').css('-ms-transform', 'translateY(0px)');
+			}
 		}
 	}.bind(this));
 };
@@ -59,13 +72,20 @@ AllSlider.prototype.animation_slide = function(){
 	this.slideContainer.css('-o-transition', 'all 0.4s ease-in-out');
 	this.slideContainer.css('transition', 'all 0.4s ease-in-out');
 	
-	this.slideContainer.find('.description').css('-webkit-transform', 'translateY(' + this.slideContainer.find('#image-' + this.currentSlide + ' .description').outerHeight() + 'px)');
-	this.slideContainer.find('.description').css('transform', 'translateY(' + this.slideContainer.find('#image-' + this.currentSlide + ' .description').outerHeight() + 'px)');
-	this.slideContainer.find('.description').css('-ms-transform', 'translateY(' + this.slideContainer.find('#image-' + this.currentSlide + ' .description').outerHeight() + 'px)');
-
-	this.slideContainer.find('#image-' + this.currentSlide + ' .description').css('-webkit-transform', 'translateY(0px)');
-	this.slideContainer.find('#image-' + this.currentSlide + ' .description').css('transform', 'translateY(0px)');
-	this.slideContainer.find('#image-' + this.currentSlide + ' .description').css('-ms-transform', 'translateY(0px)');
+	if(this.animVars.descriptionAnim == 'slideUp'){
+		this.slideContainer.find('#image-' + this.currentSlide + ' .description').css('-webkit-transition', 'all 0.4s ease-in-out');
+		this.slideContainer.find('#image-' + this.currentSlide + ' .description').css('-moz-transition', 'all 0.4s ease-in-out');
+		this.slideContainer.find('#image-' + this.currentSlide + ' .description').css('-o-transition', 'all 0.4s ease-in-out');
+		this.slideContainer.find('#image-' + this.currentSlide + ' .description').css('transition', 'all 0.4s ease-in-out');
+		
+		this.slideContainer.find('.description').css('-webkit-transform', 'translateY(' + this.slideContainer.find('#image-' + this.currentSlide + ' .description').outerHeight() + 'px)');
+		this.slideContainer.find('.description').css('transform', 'translateY(' + this.slideContainer.find('#image-' + this.currentSlide + ' .description').outerHeight() + 'px)');
+		this.slideContainer.find('.description').css('-ms-transform', 'translateY(' + this.slideContainer.find('#image-' + this.currentSlide + ' .description').outerHeight() + 'px)');
+	
+		this.slideContainer.find('#image-' + this.currentSlide + ' .description').css('-webkit-transform', 'translateY(0px)');
+		this.slideContainer.find('#image-' + this.currentSlide + ' .description').css('transform', 'translateY(0px)');
+		this.slideContainer.find('#image-' + this.currentSlide + ' .description').css('-ms-transform', 'translateY(0px)');
+	}
 };
 
 AllSlider.prototype.swipeHandler_slide = function(event, phase, direction, distance) {

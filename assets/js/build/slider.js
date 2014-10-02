@@ -2,16 +2,20 @@ var AllSlider = function(element, width, height, vars){
 	// default config
 	this.width = width;
 	this.height = height;
+	this.initialWidth = width;
+	this.initialHeight = height;
 	this.animType = 'fade';
 	this.animVars = {
 		speed:4000,
 		animSpeed:1500
 	};
+	this.elementID = element;
 	this.element = $(element);
 	this.slideContainer = this.element.find('.sliderContainer');
 	this.slides = [];
 	this.currentSlide = 0;
 	this.slideCount = 0;
+	this.imagesToLoad = 0;
 	this.ImagesLoaded = 0;
 	this.appendFirstLast = false;
 	this.slidesInitialized = false;
@@ -38,6 +42,8 @@ var AllSlider = function(element, width, height, vars){
 		this.playAnimation();
 		this.timer = setInterval(this.nextSlide.bind(this), this.animVars.speed);
 		this.initSwiping();
+		
+		window.onresize = this.onResizeHandler.bind(this);
 	};
 	
 	this.pause = function(){
@@ -84,10 +90,16 @@ var AllSlider = function(element, width, height, vars){
 				$(sliderElem).attr('id', 'image-'+i);
 				$(sliderElem).css('width', this.width);
 				$(sliderElem).css('height', this.height);
-				this.positionImage($(sliderElem).find('img'));
+				if ($(sliderElem).find('img').hasClass('slideimage')){
+					this.imagesToLoad ++;
+					this.positionImage($(sliderElem).find('img.slideimage'));
+				}
 				this.slides.push(sliderElem);
 			}.bind(this));
-		
+			
+			console.log(this.imagesToLoad);
+			if (this.imagesToLoad <= 0) this.letTheShowBegin();
+			
 			this.slidesInitialized = true;
 		}
 	};
@@ -102,11 +114,10 @@ var AllSlider = function(element, width, height, vars){
 			imgH = img[0].height;
 			
 			//make sure the slider is filled up
-			if (imgW < slider.width){
-				imgRatio = imgH/imgW;
-				imgW = img[0].width = slider.width;
-				imgH = img[0].height = slider.width*imgRatio;
-			}
+			imgRatio = imgH/imgW;
+			imgW = img[0].width = slider.width;
+			imgH = img[0].height = slider.width*imgRatio;
+			
 			if (imgH < slider.height){
 				imgRatio = imgW/imgH;
 				imgH = img[0].height = slider.height;
@@ -120,12 +131,64 @@ var AllSlider = function(element, width, height, vars){
 			image.css('margin-left', '-'+offsetX+'px');
 			
 			this.ImagesLoaded ++;
-			if (slider.ImagesLoaded >= slider.slideCount) slider.letTheShowBegin();
+			if (slider.ImagesLoaded >= slider.imagesToLoad) slider.letTheShowBegin();
 		}.bind(this)).each(function() {
 		  if(this.complete) $(this).load();
 		});
 	};
 	
+	this.onResizeHandler = function(e){
+		this.width = $(this.elementID).innerWidth();
+		this.height = $(this.elementID).innerHeight();
+		
+		containerWidth = this.width*(this.element.find('.sliderElem').length);
+		this.slideContainer.css('width', containerWidth);
+		 
+		$.each(this.sliderElements, function(i, sliderElem){
+			$(sliderElem).css('width', this.width);
+			$(sliderElem).css('height', this.height);
+			 
+			var image = $(sliderElem).find('img');
+			if (image.hasClass('slideimage')){
+				
+			  	imgW = image.width();
+			  	imgH = image.height();
+			  	
+			  	imgRatio = imgH/imgW;
+			  	imgW = this.width;
+				imgH = this.width*imgRatio;
+				console.log(imgH, this.width, imgRatio);
+
+				if (imgH < this.height){
+					console.log('height to small');
+					imgRatio = imgW/imgH;
+					imgH = this.height;
+					imgW = this.height*imgRatio;
+				}
+				
+				image.attr('width', imgW);
+			  	image.attr('height', imgH);
+				
+				offsetX = (imgW) / 2;
+				offsetY = (imgH) / 2;
+				
+				image.css('margin-top', '-'+offsetY+'px');
+				image.css('margin-left', '-'+offsetX+'px'); 
+				
+				this.slideContainer.css('-webkit-transition', 'initial');
+				this.slideContainer.css('-moz-transition', 'initial');
+				this.slideContainer.css('-o-transition', 'initial');
+				this.slideContainer.css('transition', 'initial'); 
+				slideposition = (this.currentSlide)*this.width;
+				this.slideContainer.css('-webkit-transform', 'translateX(-' + slideposition + 'px)');
+				this.slideContainer.css('transform', 'translateX(-' + slideposition + 'px)');
+				this.slideContainer.css('-ms-transform', 'translateX(-' + slideposition + 'px)');
+				
+			}
+		}.bind(this));
+	
+	};
+	 
 	this.letTheShowBegin = function (){
 		this.element.fadeIn();
 		this.element.css('display','inline-block');
