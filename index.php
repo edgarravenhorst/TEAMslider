@@ -113,12 +113,13 @@
 		
 		<script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
 		<script src="assets/js/min/jquery.touchSwipe.min.js"></script>
+		<script src="assets/js/build/slide.js"></script>
 		<script src="assets/js/build/slider.js"></script>
 		<script src="assets/js/build/animations/fade.animation.js"></script>
 		<script src="assets/js/build/animations/slide.animation.js"></script>
 		
 		<script>
-			var new_slider = new AllSlider('#allslider-1', 600, 262, {animType:'fade'});
+			var slider1 = new AllSlider('#allslider-1', 600, 262, {animType:'fade'});
 			var new_slider = new AllSlider('#allslider-2', window.innerWidth, window.innerHeight, {animType:'slide', animVars:{
 				direction:'left',
 				speed:2500,
