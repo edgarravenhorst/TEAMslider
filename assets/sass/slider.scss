@@ -7,8 +7,8 @@ body, html{
   display:inline-block;
   vertical-align:top;
   position:relative;
-  overflow:hidden;
   max-width:100%;
+  overflow:hidden; 
   
   .sliderContainer{
     width: 100%;
@@ -24,8 +24,16 @@ body, html{
     display:block;
     margin:0;
     padding:0;
-    overflow:hidden;
     max-width:100%;
+    
+    .imageholder {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      overflow:hidden;
+    }
     
     img{
       position:absolute;

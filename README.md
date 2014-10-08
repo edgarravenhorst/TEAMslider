@@ -8,7 +8,11 @@ TODO
 <ul>
 <li>[WIEH]Add bullets.</li>
 <li>[WIEH] Resize images on window resize.</li>
-<li>[EA/WIEH] Add more configurable settings.</li>
+<li>[EA/WIEH] Add more configurable settings.
+	<ul>
+	</li>Opties?</li>
+	</ul>
+</li>
 <li>[EA] Seperate slider content from interface.</li>
 </ul>
 
@@ -17,6 +21,7 @@ TODO
 <li>Add video's.</li>
 <li>Set slide direction to vertical.</li>
 </ul>
+
 BUGS
 ==========
 <ul>

@@ -7,6 +7,8 @@ module.exports = function(grunt) {
     concat:{
     	basic:{
     		src: [
+    		'assets/js/external/jquery.touchSwipe.js',
+    		'assets/js/build/slide.js',
     		'assets/js/build/slider.js', 
     		'assets/js/build/animations/fade.animation.js'
     		],
@@ -15,6 +17,7 @@ module.exports = function(grunt) {
     	full:{
     		src: [
     		'assets/js/external/jquery.touchSwipe.js',
+    		'assets/js/build/slide.js',
     		'assets/js/build/slider.js', 
     		'assets/js/build/animations/fade.animation.js',
     		'assets/js/build/animations/slide.animation.js',

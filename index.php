@@ -20,7 +20,9 @@
 		<section id='allslider-1' class=''>
 			<section id='' class='sliderContainer'>
 				<figure class='sliderElem'>
-					<img src='http://images.visitcanberra.com.au/images/canberra_hero_image.jpg' />
+					<section class='imageholder'>
+						<img class='slideimage' src='http://images.visitcanberra.com.au/images/canberra_hero_image.jpg' />
+					</section>
 					<section class='description'>
 						<section class='inner'>
 							<h1>Hallo Wereld!</h1>
@@ -33,7 +35,7 @@
 				</figure>
 				
 				<figure class='sliderElem'>
-					<img src='http://www.menucool.com/slider/jsImgSlider/images/image-slider-4.jpg' />
+					<img class='slideimage' src='http://www.menucool.com/slider/jsImgSlider/images/image-slider-4.jpg' />
 					<section class='description'>
 						<section class='inner'>
 							<h1>Hallo Wereld!</h1>
@@ -46,7 +48,9 @@
 				</figure>
 				
 				<figure class='sliderElem'>
-					<img src='http://www.last-video.com/wp-content/uploads/2013/11/superbe-image-de-poissons-sous-l-eau.jpg' />
+					<section class='imageholder'>
+						<img class='slideimage' src='http://www.last-video.com/wp-content/uploads/2013/11/superbe-image-de-poissons-sous-l-eau.jpg' />
+					</section>
 					<section class='description'>
 						<section class='inner'>
 							<h1>Hallo Wereld!</h1>
@@ -67,11 +71,15 @@
 		<section id='allslider-2' class=''>
 			<section id='' class='sliderContainer'>
 				<figure class='sliderElem'>
-					<img src='http://images.visitcanberra.com.au/images/canberra_hero_image.jpg' />
+					<section class='imageholder'>
+						<img class='slideimage' src='http://images.visitcanberra.com.au/images/canberra_hero_image.jpg' />
+					</section>
 				</figure>
 				
 				<figure class='sliderElem'>
-					<img src='http://www.menucool.com/slider/jsImgSlider/images/image-slider-4.jpg' />
+					<section class='imageholder'>
+						<img class='slideimage' src='http://www.menucool.com/slider/jsImgSlider/images/image-slider-4.jpg' />
+					</section>
 					<section class='description'>
 						<section class='inner'>
 							<h1>Hallo Wereld!</h1>
@@ -82,7 +90,9 @@
 				</figure>
 				
 				<figure class='sliderElem'>
-					<img src='http://www.last-video.com/wp-content/uploads/2013/11/superbe-image-de-poissons-sous-l-eau.jpg' />
+					<section class='imageholder'>
+						<img class='slideimage' src='http://www.last-video.com/wp-content/uploads/2013/11/superbe-image-de-poissons-sous-l-eau.jpg' />
+					</section>
 					<section class='description'>
 						<section class='inner'>
 							<h1>Hallo Wereld!</h1>
@@ -103,12 +113,13 @@
 		
 		<script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
 		<script src="assets/js/min/jquery.touchSwipe.min.js"></script>
+		<script src="assets/js/build/slide.js"></script>
 		<script src="assets/js/build/slider.js"></script>
 		<script src="assets/js/build/animations/fade.animation.js"></script>
 		<script src="assets/js/build/animations/slide.animation.js"></script>
 		
 		<script>
-			var new_slider = new AllSlider('#allslider-1', 600, 262, {animType:'fade'});
+			var slider1 = new AllSlider('#allslider-1', 600, 262, {animType:'fade'});
 			var new_slider = new AllSlider('#allslider-2', window.innerWidth, window.innerHeight, {animType:'slide', animVars:{
 				direction:'left',
 				speed:2500,
