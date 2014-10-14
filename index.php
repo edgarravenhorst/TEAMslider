@@ -23,6 +23,9 @@
 					<section class='imageholder'>
 						<img class='slideimage' src='http://images.visitcanberra.com.au/images/canberra_hero_image.jpg' />
 					</section>
+					
+					<a class='overlaybutton' href='http://www.edge-art.nl'></a>
+					
 					<section class='description'>
 						<section class='inner'>
 							<h1>Hallo Wereld!</h1>
@@ -36,6 +39,7 @@
 				
 				<figure class='sliderElem'>
 					<img class='slideimage' src='http://www.menucool.com/slider/jsImgSlider/images/image-slider-4.jpg' />
+					<a class='overlaybutton' href='http://www.edge-art.nl'></a>
 					<section class='description'>
 						<section class='inner'>
 							<h1>Hallo Wereld!</h1>
@@ -51,6 +55,7 @@
 					<section class='imageholder'>
 						<img class='slideimage' src='http://www.last-video.com/wp-content/uploads/2013/11/superbe-image-de-poissons-sous-l-eau.jpg' />
 					</section>
+					<a class='overlaybutton' href='http://www.edge-art.nl'></a>
 					<section class='description'>
 						<section class='inner'>
 							<h1>Hallo Wereld!</h1>
@@ -74,12 +79,14 @@
 					<section class='imageholder'>
 						<img class='slideimage' src='http://images.visitcanberra.com.au/images/canberra_hero_image.jpg' />
 					</section>
+					<a class='overlaybutton' href='http://www.edge-art.nl'></a>
 				</figure>
 				
 				<figure class='sliderElem'>
 					<section class='imageholder'>
 						<img class='slideimage' src='http://www.menucool.com/slider/jsImgSlider/images/image-slider-4.jpg' />
 					</section>
+					<a class='overlaybutton' href='http://www.edge-art.nl'></a>
 					<section class='description'>
 						<section class='inner'>
 							<h1>Hallo Wereld!</h1>
@@ -93,6 +100,7 @@
 					<section class='imageholder'>
 						<img class='slideimage' src='http://www.last-video.com/wp-content/uploads/2013/11/superbe-image-de-poissons-sous-l-eau.jpg' />
 					</section>
+					<a class='overlaybutton' href='http://www.edge-art.nl'></a>
 					<section class='description'>
 						<section class='inner'>
 							<h1>Hallo Wereld!</h1>

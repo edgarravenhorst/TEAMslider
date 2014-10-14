@@ -41,6 +41,10 @@ var AllSlider = function(element, width, height, vars){
 		this.timer = setInterval(this.nextSlide.bind(this), this.animVars.speed);
 		this.initSwiping();
 		
+		$('.overlaybutton').click(function(event){
+			event.preventDefault();
+		});
+		
 		window.onresize = this.onResizeHandler.bind(this);
 	};
 
@@ -75,7 +79,7 @@ var AllSlider = function(element, width, height, vars){
 	
 	this.initSwiping = function(){
 		swipeSlider = this.swipeHandler.bind(this);
-		this.element.find('.sliderContainer').swipe({swipeStatus:swipeSlider});
+		this.element.find('.sliderContainer').swipe({excludedElements:"", swipeStatus:swipeSlider});
 	};
 	
 	this.letTheShowBegin = function (){
@@ -139,6 +143,15 @@ var AllSlider = function(element, width, height, vars){
  =======================================================================
 */
 AllSlider.prototype.swipeHandler = function(event, phase, direction, distance) {
+	console.log(event, phase, direction, distance);
+	
+	if ($(event.target).attr('href') && distance < 7) {
+		if (phase == "end" || phase == "cancel"){
+			$(event.target).unbind('click').click();
+			return;
+		}
+	}
+	
 	this.swipeHandler_animtype = this['swipeHandler_' + this.animType];
 	if(!this.swipeHandler_animtype){
 		if (phase == "end" || phase == "cancel"){
