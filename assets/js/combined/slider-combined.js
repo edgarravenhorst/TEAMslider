@@ -2179,7 +2179,10 @@ var AllSlider = function(element, width, height, vars){
 	};
 	
 	this.letTheShowBegin = function (){
-		this.element.fadeIn();
+		setTimeout(function(){
+			this.onResizeHandler();
+			this.element.fadeIn();
+		}.bind(this), 100);
 	};
 	
 	/*
@@ -2261,6 +2264,7 @@ AllSlider.prototype.swipeHandler = function(event, phase, direction, distance) {
 };
 
 AllSlider.prototype.onResizeHandler = function(e){
+	this.pause();
 	this.width = $(this.elementID).innerWidth();
 	this.height = $(this.elementID).innerHeight();
 	this.resizeHandler_animtype = this['resizeHandler_' + this.animType];
@@ -2270,6 +2274,7 @@ AllSlider.prototype.onResizeHandler = function(e){
 			slide.resize(this.width, this.height);
 		}.bind(this));
 	}
+	this.play();
 };
 
 
