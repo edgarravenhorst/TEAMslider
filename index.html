@@ -1,0 +1,128 @@
+<!doctype html>
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+
+		<title>Allslide</title>
+		<meta name="description" content="The best slider you can get!">
+		<meta name="author" content="Edge-Art">
+		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+
+	    <link rel="stylesheet" href="assets/css/slider.css">
+
+	    <!--[if lt IE 9]>
+	    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	    <![endif]-->
+	</head>
+	<body>
+
+		<section id='RehabSlider-1' class=''>
+			<section id='' class='sliderContainer'>
+				<figure class='rehabslide'>
+					<section class='imageholder'>
+                        <img class='slideimage' src='http://www.viralnovelty.net/wp-content/uploads/2014/07/121.jpg' />
+					</section>
+
+					<!--<a class='overlaybutton' href='http://www.edge-art.nl'></a>-->
+				</figure>
+
+				<figure class='rehabslide'>
+					<img class='slideimage' src='http://www.menucool.com/slider/jsImgSlider/images/image-slider-4.jpg' />
+					<!--<a class='overlaybutton' href='http://www.edge-art.nl'></a>-->
+				</figure>
+
+				<figure class='rehabslide'>
+					<section class='imageholder'>
+						<img class='slideimage' src='http://www.last-video.com/wp-content/uploads/2013/11/superbe-image-de-poissons-sous-l-eau.jpg' />
+					</section>
+					<!--<a class='overlaybutton' href='http://www.edge-art.nl'></a>-->
+				</figure>
+                <figure class='rehabslide'>
+                    <section class='imageholder'>
+                        <img class='slideimage' src='http://4k.com/wp-content/uploads/2014/06/4k-image-tiger-jumping.jpg' />
+                    </section>
+                    <!--<a class='overlaybutton' href='http://www.edge-art.nl'></a>-->
+                </figure>
+                <figure class='rehabslide'>
+                    <section class='imageholder'>
+                        <img class='slideimage' src='http://www.gratuit-en-ligne.com/telecharger-gratuit-en-ligne/telecharger-image-wallpaper-gratuit/image-wallpaper-animaux/img/images/image-wallpaper-animaux-autruche.jpg' />
+                    </section>
+                    <!--<a class='overlaybutton' href='http://www.edge-art.nl'></a>-->
+                </figure>
+			</section>
+
+            <section class='btn-prev'></section>
+            <section class='btn-next'></section>
+
+			<div class='bullets'>
+				<button data-slide='1'></button>
+				<button data-slide='2'></button>
+			</div>
+		</section>
+
+        <section style="position:relative; width:100%; height:500px">
+		<section id='RehabSlider-2' class=''>
+			<section id='' class='sliderContainer'>
+				<figure class='rehabslide'>
+					<section class='imageholder'>
+                        <img class='slideimage' src='http://www.viralnovelty.net/wp-content/uploads/2014/07/121.jpg' />
+					</section>
+					<!--<a class='overlaybutton' href='http://www.code.rehab.nl'></a>-->
+				</figure>
+
+				<figure class='rehabslide'>
+					<section class='imageholder'>
+						<img class='slideimage' src='http://www.menucool.com/slider/jsImgSlider/images/image-slider-4.jpg' />
+					</section>
+					<!--<a class='overlaybutton' href='http://www.edge-art.nl'></a>-->
+					<section class='description'>
+						<section class='inner'>
+							<h1>Hallo Wereld!</h1>
+							<p>Dit is een stukje tekst Dit is een stukje tekst Dit is een stukje tekst</p>
+							<a href='#'>Lees meer ></a>
+						</section>
+					</section>
+				</figure>
+			</section>
+
+			<section class='btn-prev'></section>
+			<section class='btn-next'></section>
+			<div class='bullets'>
+				<button data-slide='1'></button>
+				<button data-slide='2'></button>
+			</div>
+		</section>
+        </section>
+
+		<script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
+		<script src="assets/js/min/jquery.touchSwipe.min.js"></script>
+		<script src="assets/js/build/slide.js"></script>
+		<script src="assets/js/build/slider.js"></script>
+        <script src="assets/js/build/thumbnailselector.js"></script>
+		<script src="assets/js/build/animations/fade.animation.js"></script>
+		<script src="assets/js/build/animations/slide.animation.js"></script>
+
+
+		<script>
+            var slider1 = new RehabSlider('#RehabSlider-1', 600, 262, {
+                animation:{
+                    type:'slide',
+                    speed:11000,
+                    delay:5000,
+                }
+            });
+            var slider2 = new RehabSlider('#RehabSlider-2', 'auto', 'auto', {
+                animation:{
+                    type:'slide',
+                    speed:7000,
+                    delay:7000,
+                }
+            });
+
+            slider1.init();
+            slider2.init();
+		</script>
+
+	</body>
+</html>

@@ -1,13 +1,13 @@
 /*
 * @fileOverview TouchSwipe - jQuery Plugin
-* @version 1.6.6
+* @version 1.6.9
 *
 * @author Matt Bryson http://www.github.com/mattbryson
 * @see https://github.com/mattbryson/TouchSwipe-Jquery-Plugin
-* @see http://labs.skinkers.com/touchSwipe/
+* @see http://labs.rampinteractive.co.uk/touchSwipe/
 * @see http://plugins.jquery.com/project/touchSwipe
 *
-* Copyright (c) 2010 Matt Bryson
+* Copyright (c) 2010-2015 Matt Bryson
 * Dual licensed under the MIT or GPL Version 2 licenses.
 *
 */
@@ -96,6 +96,20 @@
 *    				- Add 'hold' gesture 
 *    				- Be more tolerant about the tap distance
 *    				- Typos and minor fixes
+*
+* $Date: 2015-22-01 (Thurs, 22 Jan 2015) $
+* $version 1.6.7    - Added patch from https://github.com/mattbryson/TouchSwipe-Jquery-Plugin/issues/206 to fix memory leak
+*
+* $Date: 2015-2-2 (Mon, 2 Feb 2015) $
+* $version 1.6.8    - Added preventDefaultEvents option to proxy events regardless.
+*					- Fixed issue with swipe and pinch not triggering at the same time
+*
+* $Date: 2015-9-6 (Tues, 9 June 2015) $
+* $version 1.6.9    - Added PR from jdalton/hybrid to fix pointer events
+*					- Added scrolling demo
+*					- Added version property to plugin
+*
+*
 */
 
 /**
@@ -129,7 +143,8 @@
 	"use strict";
 
 	//Constants
-	var LEFT = "left",
+	var VERSION = "1.6.9",
+		LEFT = "left",
 		RIGHT = "right",
 		UP = "up",
 		DOWN = "down",
@@ -203,6 +218,7 @@
 										<code>"vertical"</code> : will force page to scroll on vertical swipes. <br/>
 	* @property {boolean} [fallbackToMouseEvents=true] If true mouse events are used when run on a non touch device, false will stop swipes being triggered by mouse events on non tocuh devices. 
 	* @property {string} [excludedElements="button, input, select, textarea, a, .noSwipe"] A jquery selector that specifies child elements that do NOT trigger swipes. By default this excludes all form, input, select, button, anchor and .noSwipe elements. 
+	* @property {boolean} [preventDefaultEvents=true] by default default events are cancelled, so the page doesn't move.  You can dissable this so both native events fire as well as your handlers.
 	
 	*/
 	var defaults = {
@@ -232,7 +248,8 @@
 		triggerOnTouchLeave:false, 
 		allowPageScroll: "auto", 
 		fallbackToMouseEvents: true,	
-		excludedElements:"label, button, input, select, textarea, a, .noSwipe"
+		excludedElements:"label, button, input, select, textarea, a, .noSwipe",
+		preventDefaultEvents:true
 	};
 
 
@@ -268,6 +285,14 @@
 
 		return $this;
 	};
+
+	/**
+	 * The version of the plugin
+	 * @readonly
+	 */
+	$.fn.swipe.version = VERSION;
+
+
 
 	//Expose our defaults so a user could override the plugin defaults
 	$.fn.swipe.defaults = defaults;
@@ -485,13 +510,12 @@
 		* Destroy the swipe plugin completely. To use any swipe methods, you must re initialise the plugin.
 		* @function
 		* @name $.fn.swipe#destroy
-		* @return {DOMNode} The Dom element that was registered with TouchSwipe 
 		* @example $("#element").swipe("destroy");
 		*/
 		this.destroy = function () {
 			removeListeners();
 			$element.data(PLUGIN_NS, null);
-			return $element;
+			$element = null;
 		};
 
 
@@ -548,16 +572,17 @@
 			var event = jqEvent.originalEvent ? jqEvent.originalEvent : jqEvent;
 			
 			var ret,
-				evt = SUPPORTS_TOUCH ? event.touches[0] : event;
+				touches = event.touches,
+				evt = touches ? touches[0] : event;
 
 			phase = PHASE_START;
 
 			//If we support touches, get the finger count
-			if (SUPPORTS_TOUCH) {
+			if (touches) {
 				// get the total number of fingers touching the screen
-				fingerCount = event.touches.length;
+				fingerCount = touches.length;
 			}
-			//Else this is the desktop, so stop the browser from dragging the image
+			//Else this is the desktop, so stop the browser from dragging content
 			else {
 				jqEvent.preventDefault(); //call this on jq event so we are cross browser
 			}
@@ -577,7 +602,7 @@
 
 			
 			// check the number of fingers is what we are looking for, or we are capturing pinches
-			if (!SUPPORTS_TOUCH || (fingerCount === options.fingers || options.fingers === ALL_FINGERS) || hasPinches()) {
+			if (!touches || (fingerCount === options.fingers || options.fingers === ALL_FINGERS) || hasPinches()) {
 				// get the coordinates of the touch
 				createFingerData( 0, evt );
 				startTime = getTimeStamp();
@@ -585,7 +610,7 @@
 				if(fingerCount==2) {
 					//Keep track of the initial pinch distance, so we can calculate the diff later
 					//Store second finger data as start
-					createFingerData( 1, event.touches[1] );
+					createFingerData( 1, touches[1] );
 					startTouchesDistance = endTouchesDistance = calculateTouchesDistance(fingerData[0].start, fingerData[1].start);
 				}
 				
@@ -641,15 +666,16 @@
 				return;
 
 			var ret,
-				evt = SUPPORTS_TOUCH ? event.touches[0] : event;
+				touches = event.touches,
+				evt = touches ? touches[0] : event;
 			
 
 			//Update the  finger data 
 			var currentFinger = updateFingerData(evt);
 			endTime = getTimeStamp();
 			
-			if (SUPPORTS_TOUCH) {
-				fingerCount = event.touches.length;
+			if (touches) {
+				fingerCount = touches.length;
 			}
 
 			if (options.hold)
@@ -664,12 +690,12 @@
 				//We do this here as well as the start event, in case they start with 1 finger, and the press 2 fingers
 				if(startTouchesDistance==0) {
 					//Create second finger if this is the first time...
-					createFingerData( 1, event.touches[1] );
+					createFingerData( 1, touches[1] );
 					
 					startTouchesDistance = endTouchesDistance = calculateTouchesDistance(fingerData[0].start, fingerData[1].start);
 				} else {
 					//Else just update the second finger
-					updateFingerData(event.touches[1]);
+					updateFingerData(touches[1]);
 				
 					endTouchesDistance = calculateTouchesDistance(fingerData[0].end, fingerData[1].end);
 					pinchDirection = calculatePinchDirection(fingerData[0].end, fingerData[1].end);
@@ -681,7 +707,9 @@
 			}
 			
 			
-			if ( (fingerCount === options.fingers || options.fingers === ALL_FINGERS) || !SUPPORTS_TOUCH || hasPinches() ) {
+
+
+			if ( (fingerCount === options.fingers || options.fingers === ALL_FINGERS) || !touches || hasPinches() ) {
 				
 				direction = calculateDirection(currentFinger.start, currentFinger.end);
 				
@@ -747,13 +775,14 @@
 		*/
 		function touchEnd(jqEvent) {
 			//As we use Jquery bind for events, we need to target the original event object
-			var event = jqEvent.originalEvent;
-				
+			//If these events are being programmatically triggered, we don't have an original event object, so use the Jq one.
+			var event = jqEvent.originalEvent ? jqEvent.originalEvent : jqEvent,
+			    touches = event.touches;
 
 			//If we are still in a touch with another finger return
 			//This allows us to wait a fraction and see if the other finger comes up, if it does within the threshold, then we treat it as a multi release, not a single release.
-			if (SUPPORTS_TOUCH) {
-				if(event.touches.length>0) {
+			if (touches) {
+				if(touches.length) {
 					startMultiFingerRelease();
 					return true;
 				}
@@ -829,7 +858,7 @@
 		* @inner
 		*/
 		function touchLeave(jqEvent) {
-			var event = jqEvent.originalEvent;
+			var event = jqEvent.originalEvent ? jqEvent.originalEvent : jqEvent;
 			
 			//If we have the trigger on leave property set....
 			if(options.triggerOnTouchLeave) {
@@ -894,37 +923,42 @@
 		* @inner
 		*/
 		function triggerHandler(event, phase) {
-			
-			var ret = undefined;
-			
-			// SWIPE GESTURES
-			if(didSwipe() || hasSwipes()) { //hasSwipes as status needs to fire even if swipe is invalid
-				//Trigger the swipe events...
-				ret = triggerHandlerForGesture(event, phase, SWIPE);
-			} 
-			
-			// PINCH GESTURES (if the above didn't cancel)
-			else if((didPinch() || hasPinches()) && ret!==false) {
-				//Trigger the pinch events...
-				ret = triggerHandlerForGesture(event, phase, PINCH);
-			}
-			
-			// CLICK / TAP (if the above didn't cancel)
-			if(didDoubleTap() && ret!==false) {
-				//Trigger the tap events...
-				ret = triggerHandlerForGesture(event, phase, DOUBLE_TAP);
-			}
-			
-			// CLICK / TAP (if the above didn't cancel)
-			else if(didLongTap() && ret!==false) {
-				//Trigger the tap events...
-				ret = triggerHandlerForGesture(event, phase, LONG_TAP);
-			}
 
-			// CLICK / TAP (if the above didn't cancel)
-			else if(didTap() && ret!==false) {
-				//Trigger the tap event..
-				ret = triggerHandlerForGesture(event, phase, TAP);
+			var ret,
+				touches = event.touches;
+			
+			//Swipes and pinches are not mutually exclusive - can happend at same time, so need to trigger 2 events potentially
+			if( (didSwipe() || hasSwipes()) || (didPinch() || hasPinches()) ) {
+				// SWIPE GESTURES
+				if(didSwipe() || hasSwipes()) { //hasSwipes as status needs to fire even if swipe is invalid
+					//Trigger the swipe events...
+					ret = triggerHandlerForGesture(event, phase, SWIPE);
+				}
+
+				// PINCH GESTURES (if the above didn't cancel)
+				if((didPinch() || hasPinches()) && ret!==false) {
+					//Trigger the pinch events...
+					ret = triggerHandlerForGesture(event, phase, PINCH);
+				}
+			} else {
+
+				// CLICK / TAP (if the above didn't cancel)
+				if(didDoubleTap() && ret!==false) {
+					//Trigger the tap events...
+					ret = triggerHandlerForGesture(event, phase, DOUBLE_TAP);
+				}
+
+				// CLICK / TAP (if the above didn't cancel)
+				else if(didLongTap() && ret!==false) {
+					//Trigger the tap events...
+					ret = triggerHandlerForGesture(event, phase, LONG_TAP);
+				}
+
+				// CLICK / TAP (if the above didn't cancel)
+				else if(didTap() && ret!==false) {
+					//Trigger the tap event..
+					ret = triggerHandlerForGesture(event, phase, TAP);
+				}
 			}
 			
 			
@@ -937,8 +971,8 @@
 			// If we are ending the gesture, then manually trigger the reset handler IF all fingers are off
 			if(phase === PHASE_END) {
 				//If we support touch, then check that all fingers are off before we cancel
-				if (SUPPORTS_TOUCH) {
-					if(event.touches.length==0) {
+				if (touches) {
+					if(!touches.length) {
 						touchCancel(event);	
 					}
 				} 
@@ -963,7 +997,7 @@
 		*/
 		function triggerHandlerForGesture(event, phase, gesture) {	
 			
-			var ret=undefined;
+			var ret;
 			
 			//SWIPES....
 			if(gesture==SWIPE) {
@@ -1234,6 +1268,7 @@
 		}
 
 
+
 		/**
 		* Checks direction of the swipe and the value allowPageScroll to see if we should allow or prevent the default behaviour from occurring.
 		* This will essentially allow page scrolling or not when the user is swiping on a touchSwipe object.
@@ -1243,7 +1278,16 @@
 		* @inner
 		*/
 		function validateDefaultEvent(jqEvent, direction) {
-			if (options.allowPageScroll === NONE || hasPinches()) {
+
+			//If we have no pinches, then do this
+			//If we have a pinch, and we we have 2 fingers or more down, then dont allow page scroll.
+
+			//If the option is set, allways allow the event to bubble up (let user handle wiredness)
+			if( options.preventDefaultEvents === false) {
+				return;
+			}
+
+			if (options.allowPageScroll === NONE) {
 				jqEvent.preventDefault();
 			} else {
 				var auto = options.allowPageScroll === AUTO;
@@ -2034,285 +2078,391 @@
  */
 
 }));
-var TEAMslider_Slide = function(id, slider, sliderElem, onLoadedFunc){
-	
-	this.id = id;
-	this.slider = slider;
-	this.width = slider.width;
-	this.height = slider.height;
-	
-	this.image = $(sliderElem).find('img.slideimage');
-	this.imagesizing = 'cover';
-	this.onLoadedFunc = onLoadedFunc;
-	
-	this.sliderElem = $(sliderElem);
-	this.sliderElem.attr('id', 'image-'+this.id);
-	this.sliderElem.css('width', this.width);
-	this.sliderElem.css('height', this.height);
-	
-	this.centerImage = function() {
-		imgRatio = this.imageH/this.imageW;
-		imgW = this.slider.width;
-		imgH = this.slider.width*imgRatio;
 
-		if (imgH < this.slider.height){
-			imgRatio = this.imageW/this.imageH;
-			imgH = this.slider.height;
-			imgW = this.slider.height*imgRatio;
-		}
-		
-		this.image.attr('width', imgW);
-		this.image.attr('height', imgH);
-				
-		offsetX = (imgW) / 2;
-		offsetY = (imgH) / 2;
-				
-		this.image.css('margin-top', '-'+offsetY+'px');
-		this.image.css('margin-left', '-'+offsetX+'px'); 
-	};
-	
-	this.resize = function (width, height){
-		this.sliderElem.css('width', width);
-		this.sliderElem.css('height', height);
-		if (this.imagesizing == 'cover') this.centerImage();
-	};
-	
-	this.loadImage = function() {
-		if (this.image){
-			this.image.one("load", function(e) {
-				this.imageW = $(e.currentTarget)[0].width;
-				this.imageH = $(e.currentTarget)[0].height;
-				this.centerImage();
-				this.onLoadedFunc();
-			}.bind(this)).each(function() {
-			  if(this.complete) $(this).load();
-			});
-		}else{
-			this.onLoadedFunc();
-		}
-	};
-	this.loadImage();
+var RehabSlide = function(id, slider, sliderElem, onLoadedFunc){
+
+    this.id = id;
+    this.slider = slider;
+    this.width = slider.width;
+    this.height = slider.height;
+
+    this.image = $(sliderElem).find('img.slideimage');
+    this.imagesizing = 'cover';
+    this.onLoadedFunc = onLoadedFunc;
+
+    this.slideObj = $(sliderElem);
+    this.slideObj.attr('id', 'image-'+this.id);
+    this.slideObj.attr('data-id', this.id);
+    this.slideObj.css('width', this.width);
+    this.slideObj.css('height', this.height);
+
+    this.centerImage = function() {
+        //console.log("Center Image")
+        var imgRatio = this.imageH/this.imageW;
+        var imgW = this.slider.width;
+        var imgH = this.slider.width*imgRatio;
+
+        if (imgH < this.slider.height){
+            imgRatio = this.imageW/this.imageH;
+            imgH = this.slider.height;
+            imgW = this.slider.height*imgRatio;
+        }
+
+        this.image.attr('width', imgW);
+        this.image.attr('height', imgH);
+
+        offsetX = (imgW) / 2;
+        offsetY = (imgH) / 2;
+
+        this.image.css('margin-top', '-'+offsetY+'px');
+        this.image.css('margin-left', '-'+offsetX+'px');
+    };
+
+    this.resize = function (width, height){
+        //console.log("Resize Image")
+        //console.log(width, height);
+        //var imgRatio = this.imageH/this.imageW;
+
+        this.slideObj.css('width', width);
+        this.slideObj.css('height', height);
+        if (this.imagesizing == 'cover' && this.image.length !== 0) this.centerImage();
+    };
+
+    this.loadImage = function() {
+        //console.log("Start Loading Image");
+        if (this.image.length !== 0){
+            this.image.one("load", function(e) {
+                console.log("Image Loaded");
+                this.imageH = $(e.currentTarget)[0].height;
+                this.imageW = $(e.currentTarget)[0].width;
+
+                console.log(this.imageW, this.imageH);
+
+                this.centerImage();
+
+                this.onLoadedFunc();
+            }.bind(this)).each(function() {
+                if(this.complete) $(this).load();
+            });
+        }else{
+            this.onLoadedFunc();
+        }
+    };
+
+    this.loadImage();
 };
 
-var AllSlider = function(element, width, height, vars){
-	// default config
-	this.width = width;
-	this.height = height;
+var activeSliders = Array();
+var RehabAnimations = Array();
 
-	this.animType = 'fade';
-	this.animVars = {
-		speed:4000,
-		animSpeed:1500
-	};
-	
+var RehabSlider = function(elementID, width, height, vars){
 
-	this.elementID = element;
-	this.element = $(element);
-	this.slideContainer = this.element.find('.sliderContainer');
-	this.slides = [];
-	this.currentSlide = 0;
-	this.slideCount = 0;
-	this.imagesToLoad = 0;
-	this.ImagesLoaded = 0;
-	this.slidesInitialized = false;
-	
-	this.init = function(){
-		this.element.hide();
-		if (vars.animType) this.animType = vars.animType;
-		if (vars.animVars) this.animVars = vars.animVars;
-			
-		this.element.addClass('allslider');
-		this.element.addClass(this.animType);
-		this.element.css('width',width);
-		this.element.css('height',height);
-		
-		//initialize the interface
-		this.initInterface();
-		this.element.find('.sliderElem').hide();
-		this.initAnimation = this['init_' + this.animType + '_animation'];
-		this.playAnimation = this['animation_' + this.animType];
-		this.initAnimation();
-		if(!this.slidesInitialized ) this.initSlides();
-		//this.playAnimation();
-		this.timer = setInterval(this.nextSlide.bind(this), this.animVars.speed);
-		this.initSwiping();
-		
-		$('.overlaybutton').click(function(event){
-			event.preventDefault();
-		});
-		
-		window.onresize = this.onResizeHandler.bind(this);
-	};
+    //slider vars
+    this.sliderID = elementID;
+    this.sliderObj = $(elementID);
+    this.width = width;
+    this.height = height;
+    this.currentSlide = 0;
+    this.previousSlide = -1;
 
-	this.initSlides = function(reinitialize){
-		if (this.slidesInitialized === false || reinitialize === true){
-			this.ImagesLoaded = 0;
-			this.slides = [];
-			this.sliderElements = this.element.find('.sliderElem');
-			this.slideCount = this.element.find('.sliderElem').length;
-			
-			$.each(this.sliderElements, function(id, sliderElem){
-				var slide = new TEAMslider_Slide(id, this, sliderElem, this.imageLoaded.bind(this));
-				this.slides.push(slide);
-			}.bind(this));
-			this.slidesInitialized = true;
-		}
-	};
-	
-	this.initInterface = function(){
-		nextBtn = this.element.find('.btn-next');
-		prevBtn = this.element.find('.btn-prev');
-		nextBtn.click(this.nextSlide.bind(this));
-		prevBtn.click(this.prevSlide.bind(this));
-		
-		//add bullet stuff here;
-	};
+    //animation vars
+    this.animationType = vars.animation.type || 'slide';
+    this.animationspeed = vars.animation.speed || 1500;
+    this.slideDelay = vars.animation.delay || 4000;
+    this.animationVars = vars.animation;
+    this.animation = RehabAnimations[this.animationType] ? new RehabAnimations[this.animationType](this, this.animationVars) : false;
 
-	this.imageLoaded = function(){
-		this.ImagesLoaded ++;
-		if (this.ImagesLoaded >= this.slideCount) this.letTheShowBegin();
-	};
-	
-	this.initSwiping = function(){
-		swipeSlider = this.swipeHandler.bind(this);
-		this.element.find('.sliderContainer').swipe({excludedElements:"", swipeStatus:swipeSlider});
-	};
-	
-	this.letTheShowBegin = function (){
-		setTimeout(function(){
-			this.onResizeHandler();
-			this.element.fadeIn();
-		}.bind(this), 100);
-	};
-	
-	/*
+    //selector vars
+    this.selector = false;
+    this.selectorItemsInView = 3;
+
+    //timer vars
+    this.timer;
+    this.timelineTimer;
+    this.timeline = true;
+
+    //initialisation vars
+    this.dynamicWidth = (!width || width == "auto" || width == -1) ? true : false;
+    this.dynamicHeight = (!height || height == "auto" || height == -1) ? true : false;
+
+    this.imagesToLoad = 0;
+    this.ImagesLoaded = 0;
+
+    this.slides = [];
+    this.slideCount = 0;
+    this.slidesInitialized = false;
+
+    //=====================================================================================
+    //initialize vars & slides
+    //=====================================================================================
+
+    //this.sliderObj.find('.sliderElem').hide();
+
+    this.init = function(){
+        //prepare html structure
+        this.sliderObj.addClass('rehabslider');
+        this.sliderObj.addClass('animation_' + this.animationType);
+        this.bullets = this.sliderObj.find('.bullets');
+        this.slideContainer = this.sliderObj.find('.sliderContainer');
+
+        //prepare settings
+        this.setSliderSize(this.width, this.height);
+
+        //init slides
+        if(!this.slidesInitialized ) this.initSlides();
+
+        //init interface
+        this.initInterface();
+
+        //extend html structure
+        if(this.bullets) this.bulletsCreate();
+
+        //init animation
+        this.animation.init();
+
+        //init swipeing
+        this.initSwiping();
+
+        //init timer
+        if(this.timeline) this.initTimeline();
+
+        if(this.selector) this.selector = new ThumbnailSelector(this, this.selectorItemsInView);
+
+        $(window).resize(this.onResizeHandler.bind(this));
+        activeSliders.push(this);
+    };
+
+    //this function prepares the slides.
+    this.initSlides = function(reinitialize){
+        if (this.slidesInitialized === false || reinitialize === true){
+            this.ImagesLoaded = 0;
+            this.slides = [];
+            this.sliderElements = this.sliderObj.find('.rehabslide');
+            this.slideCount = this.sliderObj.find('.rehabslide').length;
+
+            $.each(this.sliderElements, function(id, sliderElem){
+                var slide = new RehabSlide(id, this, sliderElem, this.imageLoaded.bind(this));
+                this.slides.push(slide);
+            }.bind(this));
+
+            this.slidesInitialized = true;
+        }
+    };
+
+    this.imageLoaded = function(){
+        this.ImagesLoaded ++;
+        if (this.ImagesLoaded >= this.slideCount) this.letTheShowBegin();
+    };
+
+    this.letTheShowBegin = function (){
+        if(this.hasSelector) this.selector = new ThumbnailSelector(this, this.selectorThumbsVisible);
+        this.sliderObj.fadeIn();
+        this.onResizeHandler();
+    };
+
+    this.onResizeHandler = function(e){
+        this.pause();
+
+        //resize slider & slides
+        this.setSliderSize(this.width, this.height);
+        $.each(this.slides, function(i, slide){
+            slide.resize(this.width, this.height);
+        }.bind(this));
+
+        if(this.selector) this.selector.onResizeHandler();
+
+        this.play();
+    };
+
+
+    //=====================================================================================
+    //initialization functions
+    //=====================================================================================
+
+    //this function sets the slider size;
+    this.setSliderSize = function(width, height) {
+        //set width
+        if (this.dynamicWidth) this.width = this.sliderObj.parent().innerWidth();
+        this.sliderObj.css('width', this.width);
+
+        //set height
+        if(this.dynamicHeight) this.height = this.sliderObj.parent().innerHeight();
+        this.sliderObj.css('height', this.height);
+    };
+
+    //this function creates bullets
+    this.bulletsCreate = function(){
+        // create bullets depending on slide count
+        for(var i=0; i<(this.slideCount-2); i++){
+            $(".bullets",this.sliderID)
+                .append('<button data-slide="'+(i+1)+'"></button>');
+        }
+    };
+
+    this.initInterface = function(){
+        nextBtn = this.sliderObj.find('.btn-next');
+        prevBtn = this.sliderObj.find('.btn-prev');
+        nextBtn.click(this.nextSlide.bind(this));
+        prevBtn.click(this.prevSlide.bind(this));
+
+        this.initBullets();
+    };
+
+    this.initBullets = function(){
+        var slider = this;
+        $(".bullets button",this.elementID).each(function(index,element){
+            slider.activeState(slider.currentSlide);
+            $(this).on('click',function(){
+                slider.toSlide((index+1));
+                slider.activeState();
+            });
+        });
+    };
+
+    this.initTimeline = function(){
+        this.sliderObj.prepend("<section class='timeline'><div class='curtime'></div></section>");
+        this.timelineStatusBar = this.sliderObj.find('.timeline .curtime');
+
+    };
+
+    this.updateTimeline = function(){
+        var elapsedTime = new Date() - this.timelineStartDate;
+        var curtime = (elapsedTime / this.animationVars.delay) * 100;
+        this.timelineStatusBar.css('width', curtime+"%");
+
+    };
+
+    this.initSwiping = function(){
+        var swipeHandler = this.swipeHandler.bind(this);
+        this.sliderObj.swipe({allowPageScroll:"vertical", excludedElements:".btn-prev, .btn-next, button", triggerOnTouchLeave:true, swipeStatus:swipeHandler});
+    };
+
+    this.swipeHandler = function(event, phase, direction, distance) {
+        //console.log(event, phase, direction, distance);
+
+        if(phase == "move" && direction != "up" && direction != "down" && distance > 10) this.pause();
+
+        if ($(event.target).attr('href') && distance < 7) {
+            if (phase == "end" || phase == "cancel"){
+                $(event.target).unbind('click').click();
+                return;
+            }
+        }
+        if (!this.animation.onswipe){
+            if (phase == "end" || phase == "cancel"){
+                if (direction == 'left')
+                    this.nextSlide();
+                if (direction == 'right')
+                    this.prevSlide();
+            }
+        }else this.animation.onswipe(event, phase, direction, distance);
+    };
+
+    /*
 	 =======================================================================
 	 Usable Slider functions
 	 =======================================================================
 	*/
-	
-	this.play = function(){
-		this.timer = setInterval(this.nextSlide.bind(this), this.animVars.speed);
-	};
-	
-	this.pause = function(){
-		clearInterval(this.timer);
-	};
-	
-	this.nextSlide = function(e){
-		this.pause();
-		this.currentSlide ++;
-		if (this.currentSlide >= this.slideCount) this.currentSlide = 0;
-		this.timer = setInterval(this.nextSlide.bind(this), this.animVars.speed);
-		this.playAnimation();
-		if (e)e.preventDefault();
-	};
-	
-	this.prevSlide = function(e){
-		this.pause();
-		this.currentSlide --;
-		if (this.currentSlide < 0) this.currentSlide = this.slideCount-1;
-		this.timer = setInterval(this.nextSlide.bind(this), this.animVars.speed);
-		this.playAnimation();
-		if (e)e.preventDefault();
-	};
-	
-	this.toSlide = function(slideNR){
-		this.pause();
-		this.currentSlide = slideNR;
-		if (this.currentSlide < 0) this.currentSlide = this.slideCount-1;
-		if (this.currentSlide >= this.slideCount) this.currentSlide = 0;
-		this.timer = setInterval(this.nextSlide.bind(this), this.animVars.speed);
-		this.playAnimation();
-	};
-	
-	this.changeAnimation = function(type){
-		this.pause();
-		this.playAnimation = this['animation_' + this.animType];
-		this.timer = setInterval(this.nextSlide(), this.animVars.speed);
-	};
-	
-	/* initialize slider */
-	this.init(vars);
-};
 
-/*
- =======================================================================
- Overwritable functions
- =======================================================================
-*/
-AllSlider.prototype.swipeHandler = function(event, phase, direction, distance) {
-	console.log(event, phase, direction, distance);
-	
-	if ($(event.target).attr('href') && distance < 7) {
-		if (phase == "end" || phase == "cancel"){
-			$(event.target).unbind('click').click();
-			return;
-		}
-	}
-	
-	this.swipeHandler_animtype = this['swipeHandler_' + this.animType];
-	if(!this.swipeHandler_animtype){
-		if (phase == "end" || phase == "cancel"){
-			this.pause();
-			if (direction == 'left')
-				this.nextSlide();
-			if (direction == 'right')
-			   	this.prevSlide();
-		}
-	}else this.swipeHandler_animtype(event, phase, direction, distance);	
-};
+    this.play = function(){
+        clearInterval(this.timer);
+        this.timer = setInterval(this.nextSlide.bind(this), this.slideDelay);
+        if (this.timeline) {
+            this.timelineStartDate = new Date();
+            clearInterval(this.timelineTimer);
+            this.timelineTimer = setInterval(this.updateTimeline.bind(this), 10);
+        }
+    };
 
-AllSlider.prototype.onResizeHandler = function(e){
-	this.pause();
-	this.width = $(this.elementID).innerWidth();
-	this.height = $(this.elementID).innerHeight();
-	this.resizeHandler_animtype = this['resizeHandler_' + this.animType];
-	if(this.resizeHandler_animtype) this.resizeHandler_animtype();
-	else {
-		$.each(this.slides, function(i, slide){
-			slide.resize(this.width, this.height);
-		}.bind(this));
-	}
-	this.play();
-};
+    this.pause = function(){
+        clearInterval(this.timer);
+        clearInterval(this.timelineTimer);
+    };
 
+    this.nextSlide = function(e){
+        this.pause();
+        this.previousSlide = this.currentSlide;
+        this.currentSlide ++;
+        if (this.currentSlide >= this.slideCount) this.currentSlide = 0;
+        this.play();
+        this.animation.animate(this.previousSlide, this.currentSlide);
+        if (e)e.preventDefault();
+        this.activeState();
+        if(this.hasSelector) this.selector.highlight(this.currentSlide);
+    };
 
-AllSlider.prototype.init_fade_animation = function(){
-	
-	
-	this.element.find('.description').css('-webkit-transform', 'translateY(' + this.element.find('.description').outerHeight() + 'px)');
-	this.element.find('.description').css('transform', 'translateY(' + this.element.find('.description').outerHeight() + 'px)');
-	this.element.find('.description').css('-ms-transform', 'translateY(' + this.element.find('.description').outerHeight() + 'px)');
-	
-	this.element.find('.description').css('-webkit-transition', 'all 0.4s ease-in-out 0.5s');
-	this.element.find('.description').css('-moz-transition', 'all 0.4s ease-in-out 0.5s');
-	this.element.find('.description').css('-o-transition', 'all 0.4s ease-in-out 0.5s');
-	this.element.find('.description').css('transition', 'all 0.4s ease-in-out 0.5s');
-	
-	this.element.find('.sliderElem').css('-webkit-transition', 'opacity 0.7s ease-in-out');
-	this.element.find('.sliderElem').css('-moz-transition', 'opacity 0.7s ease-in-out');
-	this.element.find('.sliderElem').css('-o-transition', 'opacity 0.7s ease-in-out');
-	this.element.find('.sliderElem').css('transition', 'opacity 0.7s ease-in-out');
+    this.prevSlide = function(e){
+        this.pause();
+        this.previousSlide = this.currentSlide;
+        this.currentSlide --;
+        if (this.currentSlide < 0) this.currentSlide = this.slideCount-1;
+        this.play();
+        this.animation.animate(this.previousSlide, this.currentSlide);
+        if (e)e.preventDefault();
+        this.activeState();
+        if(this.hasSelector) this.selector.highlight(this.currentSlide);
+    };
 
-};
+    this.activeState = function(){
+        var activeNum;
+        if((this.currentSlide) > (this.slideCount-2))
+            activeNum = 0;
+        else
+            activeNum = (this.currentSlide-1);
 
-AllSlider.prototype.animation_fade = function(){
-	this.element.find('.sliderElem').show();
-	//this.element.find('.sliderElem').fadeOut(this.animVars.animSpeed);
-	//this.element.find('#image-'+this.currentSlide).stop().fadeIn(this.animVars.animSpeed);
+        $("button", this.bullets).removeClass('active');
+        $("button", this.bullets).eq(activeNum).addClass('active');
+    }.bind(this);
 
-	this.element.find('.description').css('-webkit-transform', 'translateY(' + this.element.find('#image-' + this.currentSlide + ' .description').outerHeight() + 'px)');
-	this.element.find('.description').css('transform', 'translateY(' + this.element.find('#image-' + this.currentSlide + ' .description').outerHeight() + 'px)');
-	this.element.find('.description').css('-ms-transform', 'translateY(' + this.element.find('#image-' + this.currentSlide + ' .description').outerHeight() + 'px)');
+    this.toSlide = function(slideNR){
+        this.pause();
+        this.previousSlide = this.currentSlide;
+        this.currentSlide = slideNR;
+        if (this.currentSlide < 0) this.currentSlide = this.slideCount-1;
+        if (this.currentSlide >= this.slideCount) this.currentSlide = 0;
+        this.play();
+        this.animation.animate(this.previousSlide, this.currentSlide);
+        this.activeState();
+        if(this.hasSelector) this.selector.select(this.currentSlide);
+    };
+}
 
-	this.element.find('#image-' + this.currentSlide + ' .description').css('-webkit-transform', 'translateY(0px)');
-	this.element.find('#image-' + this.currentSlide + ' .description').css('transform', 'translateY(0px)');
-	this.element.find('#image-' + this.currentSlide + ' .description').css('-ms-transform', 'translateY(0px)');
-	
-	this.element.find('.sliderElem').css('z-index', '1');
-	this.element.find('.sliderElem').css('opacity', '0');
-	this.element.find('#image-' + this.currentSlide).css('z-index', '999');
-	this.element.find('#image-' + this.currentSlide).css('opacity', '1');
-	
+RehabAnimations['fade'] = function(slider, animationVars) {
+
+    this.sliderObj = slider.sliderObj;
+    this.speedseconds = animationVars.speed/10000;
+
+    this.init = function(){
+        this.sliderObj.find('.rehabslide').css('opacity', '0');
+        this.sliderObj.find('.rehabslide:first-child').css('z-index', '999');
+        this.sliderObj.find('.rehabslide:first-child').css('opacity', '1');
+
+        this.setCSS3(this.sliderObj.find('.rehabslide'), "transition", 'opacity ' + this.speedseconds + 's ease-in-out');
+    };
+
+    this.animate = function(previousSlide, currentSlide){
+        this.animateOut(previousSlide);
+        this.animateIn(currentSlide);
+    };
+
+    this.animateIn = function(currentSlide){
+        this.sliderObj.find('#image-' + currentSlide).css('z-index', '1');
+        this.sliderObj.find('#image-' + currentSlide).css('opacity', '1');
+    };
+
+    this.animateOut = function(previousSlide){
+        this.sliderObj.find('#image-' + previousSlide).css('z-index', '0');
+        this.sliderObj.find('#image-' + previousSlide).css('opacity', '0');
+    };
+
+    this.onresize = function(){
+
+    };
+
+    this.setCSS3 = function (element, property, value) {
+        element.css('-webkit-'+property, value);
+        element.css('-moz-'+property, value);
+        element.css('-o-'+property, value);
+        element.css(property, value);
+    };
 };
