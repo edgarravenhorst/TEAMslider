@@ -2152,6 +2152,7 @@ var RehabSlide = function(id, slider, sliderElem, onLoadedFunc){
     this.loadImage();
 };
 
+
 var activeSliders = Array();
 var RehabAnimations = Array();
 
@@ -2293,10 +2294,12 @@ var RehabSlider = function(elementID, width, height, vars){
     //this function creates bullets
     this.bulletsCreate = function(){
         // create bullets depending on slide count
-        for(var i=0; i<(this.slideCount-2); i++){
+        for(var i=0; i<(this.slideCount); i++){
             $(".bullets",this.sliderID)
                 .append('<button data-slide="'+(i+1)+'"></button>');
         }
+
+		 this.initBullets();
     };
 
     this.initInterface = function(){
@@ -2305,7 +2308,7 @@ var RehabSlider = function(elementID, width, height, vars){
         nextBtn.click(this.nextSlide.bind(this));
         prevBtn.click(this.prevSlide.bind(this));
 
-        this.initBullets();
+
     };
 
     this.initBullets = function(){
@@ -2405,10 +2408,12 @@ var RehabSlider = function(elementID, width, height, vars){
 
     this.activeState = function(){
         var activeNum;
-        if((this.currentSlide) > (this.slideCount-2))
+        if((this.currentSlide) > (this.slideCount-1))
             activeNum = 0;
         else
-            activeNum = (this.currentSlide-1);
+            activeNum = (this.currentSlide);
+
+		console.log(activeNum);
 
         $("button", this.bullets).removeClass('active');
         $("button", this.bullets).eq(activeNum).addClass('active');
@@ -2417,7 +2422,7 @@ var RehabSlider = function(elementID, width, height, vars){
     this.toSlide = function(slideNR){
         this.pause();
         this.previousSlide = this.currentSlide;
-        this.currentSlide = slideNR;
+        this.currentSlide = slideNR-1;
         if (this.currentSlide < 0) this.currentSlide = this.slideCount-1;
         if (this.currentSlide >= this.slideCount) this.currentSlide = 0;
         this.play();
@@ -2426,6 +2431,7 @@ var RehabSlider = function(elementID, width, height, vars){
         if(this.hasSelector) this.selector.select(this.currentSlide);
     };
 }
+
 
 RehabAnimations['fade'] = function(slider, animationVars) {
 
@@ -2466,6 +2472,7 @@ RehabAnimations['fade'] = function(slider, animationVars) {
         element.css(property, value);
     };
 };
+
 
 RehabAnimations['slide'] = function(slider, animationVars) {
 
